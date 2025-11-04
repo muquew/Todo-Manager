@@ -931,10 +931,7 @@
             renderTasks();
 
             // 设置最小日期为今天
-            const today = new Date();
-            const timezoneOffset = today.getTimezoneOffset() * 60000;
-            const localDate = new Date(today.getTime() - timezoneOffset);
-            dueDateInput.min = localDate.toISOString().split('T')[0];
+            dueDateInput.min = new Date().toISOString().split('T')[0];
 
             // 使用IndexedDB检查是否已添加示例任务
             const sampleTasksAdded = await getConfig('sampleTasksAdded');
@@ -1000,10 +997,7 @@
         dueTimeInput.disabled = this.checked;
 
         if (this.checked) {
-            const today = new Date();
-            const timezoneOffset = today.getTimezoneOffset() * 60000;
-            const localDate = new Date(today.getTime() - timezoneOffset);
-            dueDateInput.value = localDate.toISOString().split('T')[0];
+            dueDateInput.value = new Date().toISOString().split('T')[0];
             dueTimeInput.value = '23:59';
         }
     });
@@ -1021,10 +1015,7 @@
         dueTimeInput.disabled = false;
 
         // 设置默认时间为今天23:59
-        const today = new Date();
-        const timezoneOffset = today.getTimezoneOffset() * 60000;
-        const localDate = new Date(today.getTime() - timezoneOffset);
-        dueDateInput.value = localDate.toISOString().split('T')[0];
+        dueDateInput.value = new Date().toISOString().split('T')[0];
 
         taskModal.style.display = 'flex';
         document.getElementById('taskName').focus();
@@ -1048,16 +1039,13 @@
 
     // 添加示例任务
     async function addSampleTasks() {
-        const today = new Date();
-        const timezoneOffset = today.getTimezoneOffset() * 60000;
-        const localDate = new Date(today.getTime() - timezoneOffset);
 
         const sampleTasks = [
             {
                 id: Date.now() + 1,
                 name: "完成项目报告",
                 description: "编写并提交季度项目总结报告",
-                dueDate: new Date(localDate.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+                dueDate: new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
                 createdAt: new Date().toISOString(),
                 completed: false
             },
@@ -1065,7 +1053,7 @@
                 id: Date.now() + 2,
                 name: "团队会议准备",
                 description: "准备下周团队会议的演示材料",
-                dueDate: new Date(localDate.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+                dueDate: new Date(new Date().getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(),
                 createdAt: new Date().toISOString(),
                 completed: false
             },
@@ -1099,9 +1087,7 @@
 
         let dueDateTime = null;
         if (hasDeadline && dueDateInput.value) {
-            const localDateTime = new Date(`${dueDateInput.value}T${dueTimeInput.value}`);
-            // 转换为UTC时间存储
-            dueDateTime = new Date(localDateTime.getTime() + (localDateTime.getTimezoneOffset() * 60000)).toISOString();
+            dueDateTime = localToUTC(dueDateInput.value, dueTimeInput.value);
         }
 
         const taskData = {
@@ -1153,12 +1139,9 @@
         document.getElementById('taskDesc').value = task.description || '';
 
         if (task.dueDate) {
-            const dueDate = new Date(task.dueDate);
-            const localDate = new Date(dueDate.getTime() - (dueDate.getTimezoneOffset() * 60000));
-
-            document.getElementById('dueDate').value = localDate.toISOString().split('T')[0];
-            document.getElementById('dueTime').value =
-                `${localDate.getHours().toString().padStart(2, '0')}:${localDate.getMinutes().toString().padStart(2, '0')}`;
+            const localDate = utcToLocal(task.dueDate);
+            dueDateInput.value = localDate.toISOString().split('T')[0];
+            dueTimeInput.value = `${localDate.getHours().toString().padStart(2,'0')}:${localDate.getMinutes().toString().padStart(2,'0')}`;
             noDeadlineCheckbox.checked = false;
             dueDateInput.disabled = false;
             dueTimeInput.disabled = false;
@@ -1484,12 +1467,11 @@
         });
     }
 
-    // 计算剩余时间（返回小时数）
-    function calculateTimeLeft(dueDate) {
+    // 计算剩余时间（小时）
+    function calculateTimeLeft(utcStr) {
         const now = new Date();
-        const due = new Date(dueDate);
-        const timeDiff = due.getTime() - now.getTime();
-        return timeDiff / (1000 * 60 * 60); // 返回小时数
+        const due = new Date(utcStr);
+        return (due.getTime() - now.getTime()) / (1000 * 60 * 60); // 返回小时数
     }
 
     // 根据剩余时间获取状态
@@ -1531,18 +1513,7 @@
         }
     }
 
-    // 格式化日期时间
-    function formatDateTime(dateTimeString) {
-        const date = new Date(dateTimeString);
-        const options = {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        };
-        return date.toLocaleDateString('zh-CN', options);
-    }
+
 
     // 格式化剩余时间
     function formatTimeLeft(hoursLeft) {
@@ -1563,6 +1534,32 @@
             return `${Math.floor(hoursLeft / 24)}天`;
         }
     }
+
+    // 本地时间 -> UTC ISO 字符串
+    function localToUTC(dateStr, timeStr = '23:59') {
+        const localDate = new Date(`${dateStr}T${timeStr}`);
+        return new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000).toISOString();
+    }
+
+    // UTC ISO -> 本地 Date 对象
+    function utcToLocal(utcStr) {
+        const utcDate = new Date(utcStr);
+        return new Date(utcDate.getTime() - utcDate.getTimezoneOffset() * 60000);
+    }
+
+    // 格式化 UTC ISO -> 本地显示字符串
+    function formatDateTime(utcStr) {
+        const localDate = utcToLocal(utcStr);
+        const options = {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        };
+        return localDate.toLocaleDateString('zh-CN', options);
+    }
+
 </script>
 </body>
 </html>
