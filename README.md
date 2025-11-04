@@ -112,5 +112,3 @@ Permission is hereby granted, free of charge, to any individual user obtaining a
 
 **Note:**
 By downloading or using this software from this repository, you agree to comply with the above terms.
-
----
