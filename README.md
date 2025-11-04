@@ -17,8 +17,12 @@
 ---
 
 ## 📸 演示截图
-![任务列表](./screenshots/task-list.png)  
-![添加任务弹窗](./screenshots/add-task.png)
+
+<div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; align-items: flex-start;">
+    <img src="./screenshots/task-list.png" alt="任务列表" style="width: 45%; max-width: 300px; border-radius: 8px;"/>
+    <img src="./screenshots/add-task.png" alt="添加任务弹窗" style="width: 45%; max-width: 300px; border-radius: 8px;"/>
+</div>
+
 
 ---
 
