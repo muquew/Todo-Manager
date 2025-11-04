@@ -18,8 +18,7 @@
 
 ## 📸 演示截图
 ![任务列表](./screenshots/task-list.png)  
-![添加任务弹窗](./screenshots/add-task.png)  
-*提示：你可以将你的截图放在 `screenshots/` 文件夹中*
+![添加任务弹窗](./screenshots/add-task.png)
 
 ---
 
