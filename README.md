@@ -1,6 +1,6 @@
 # 📝 Todo Manager / Task Tracker
 
-**[🇨🇳 中文版说明 / Chinese Version](./README_zh.md)**
+**[中文版说明 / Chinese Version](./README_zh_cn.md)**
 
 A lightweight web-based task manager built entirely in a single **HTML file** using **IndexedDB** for persistent storage.
 It supports adding, editing, deleting, completing, filtering, and exporting tasks, with progress visualization and responsive design.
