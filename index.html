@@ -682,9 +682,9 @@
                     padding-bottom: 15px;
                 }
 
-                .stat-label {
-                    font-size: 10px;
-                }
+                /*.stat-label {*/
+                /*    font-size: 10px;*/
+                /*}*/
             }
         }
     </style>
@@ -731,8 +731,8 @@
             <input class="search-input" data-i18n-placeholder="searchPlaceholder" id="searchInput" onkeyup="filterTasks()" placeholder="搜索任务..." type="text">
         </div>
         <div class="filters">
-            <button class="filter-btn active" data-filter="all" data-i18n="filterAll" onclick="setFilter('all')">全部</button>
-            <button class="filter-btn" data-filter="active" data-i18n="filterActive" onclick="setFilter('active')">进行中</button>
+            <button class="filter-btn" data-filter="all" data-i18n="filterAll" onclick="setFilter('all')">全部</button>
+            <button class="filter-btn active" data-filter="active" data-i18n="filterActive" onclick="setFilter('active')">进行中</button>
             <button class="filter-btn" data-filter="completed" data-i18n="filterCompleted" onclick="setFilter('completed')">已完成</button>
             <button class="filter-btn" data-filter="overdue" data-i18n="filterOverdue" onclick="setFilter('overdue')">已过期</button>
             <button class="filter-btn" data-filter="no-deadline" data-i18n="filterNoDeadline" onclick="setFilter('no-deadline')">无截止日期</button>
@@ -861,6 +861,7 @@
             'cancel': '取消',
             'updateTask': '更新任务',
             'totalTasks': '总任务',
+            'activeTasks': '进行中',
             'completedTasks': '已完成',
             'tasksWithDeadline': '有截止日期',
             'overdueTasks': '已过期',
@@ -926,6 +927,7 @@
             'cancel': 'Cancel',
             'updateTask': 'Update Task',
             'totalTasks': 'Total Tasks',
+            'activeTasks': 'Active',
             'completedTasks': 'Completed',
             'tasksWithDeadline': 'With Deadline',
             'overdueTasks': 'Overdue',
@@ -1194,8 +1196,8 @@
     function renderStats() {
         const statsContainer = document.getElementById('statsContainer');
         const totalTasks = tasks.length;
+        const activeTasks = tasks.filter(task => !task.completed).length;
         const completedTasks = tasks.filter(task => task.completed).length;
-        const tasksWithDeadline = tasks.filter(task => task.dueDate).length;
         const tasksWithoutDeadline = tasks.filter(task => !task.dueDate).length;
         const overdueTasks = tasks.filter(task => {
             if (!task.dueDate || task.completed) return false;
@@ -1208,12 +1210,12 @@
                 <div class="stat-label">${translations[currentLanguage]['totalTasks']}</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">${completedTasks}</div>
-                <div class="stat-label">${translations[currentLanguage]['completedTasks']}</div>
+                <div class="stat-value">${activeTasks}</div>
+                <div class="stat-label">${translations[currentLanguage]['activeTasks']}</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value">${tasksWithDeadline}</div>
-                <div class="stat-label">${translations[currentLanguage]['tasksWithDeadline']}</div>
+                <div class="stat-value">${completedTasks}</div>
+                <div class="stat-label">${translations[currentLanguage]['completedTasks']}</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value">${overdueTasks}</div>
