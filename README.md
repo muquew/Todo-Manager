@@ -29,8 +29,8 @@ Try it now: [https://todo.muquew.com/](https://todo.muquew.com/)
 ## 📸 Screenshots
 
 <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; align-items: flex-start;">
-    <img src="./screenshots/task-list.png" alt="Task List" style="width: 45%; max-width: 300px; border-radius: 8px;"/>
-    <img src="./screenshots/add-task.png" alt="Add Task Dialog" style="width: 45%; max-width: 300px; border-radius: 8px;"/>
+    <img src="./screenshots/task-list-en.png" alt="Task List" style="width: 45%; max-width: 300px; border-radius: 8px;"/>
+    <img src="./screenshots/add-task-en.png" alt="Add Task Dialog" style="width: 45%; max-width: 300px; border-radius: 8px;"/>
 </div>
 
 ---
