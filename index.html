@@ -837,141 +837,6 @@
     const notification = document.getElementById('notification');
     const notificationText = document.getElementById('notificationText');
 
-    const translations = {
-        'zh-CN': {
-            'appTitle': '任务跟踪器',
-            'appSubtitle': '基于截止日期的任务管理',
-            'export': '导出',
-            'import': '导入',
-            'addTask': '添加任务',
-            'searchPlaceholder': '搜索任务...',
-            'filterAll': '全部',
-            'filterActive': '进行中',
-            'filterCompleted': '已完成',
-            'filterOverdue': '已过期',
-            'filterNoDeadline': '无截止日期',
-            'addNewTask': '添加新任务',
-            'editTask': '编辑任务',
-            'taskNameLabel': '任务名称 *',
-            'taskNamePlaceholder': '输入任务名称',
-            'taskDescLabel': '任务描述 (可选)',
-            'taskDescPlaceholder': '输入任务描述',
-            'dueDateLabel': '截止日期 (可选)',
-            'noDeadlineLabel': '无截止日期',
-            'cancel': '取消',
-            'updateTask': '更新任务',
-            'totalTasks': '总任务',
-            'activeTasks': '进行中',
-            'completedTasks': '已完成',
-            'tasksWithDeadline': '有截止日期',
-            'overdueTasks': '已过期',
-            'tasksWithoutDeadline': '无截止日期',
-            'noTasks': '暂无任务',
-            'noTasksDescription': '点击"添加任务"按钮开始跟踪您的任务',
-            'noMatchingTasks': '没有找到匹配的任务',
-            'noMatchingTasksDescription': '尝试调整搜索条件或筛选器',
-            'deadline': '截止',
-            'noDeadlineText': '无截止日期',
-            'statusCompleted': '已完成',
-            'statusSafe': '安全',
-            'statusWarning': '警告',
-            'statusDanger': '紧急',
-            'statusOverdue': '已过期',
-            'statusNoDeadline': '无截止日期',
-            'markComplete': '标记为已完成',
-            'markIncomplete': '标记为未完成',
-            'editTaskTitle': '编辑任务',
-            'deleteTaskTitle': '删除任务',
-            'confirmDelete': '确定要删除这个任务吗？',
-            'taskAdded': '任务添加成功',
-            'taskUpdated': '任务更新成功',
-            'taskDeleted': '任务删除成功',
-            'taskMarkedComplete': '任务标记为已完成',
-            'taskMarkedIncomplete': '任务标记为未完成',
-            'exportSuccess': '任务数据导出成功！',
-            'importSuccess': '成功导入 {count} 个任务！',
-            'importConfirm': '即将导入 {count} 个任务。是否替换当前数据？',
-            'importFormatError': '导入失败：文件格式不正确',
-            'importReadError': '导入失败：文件读取错误',
-            'saveError': '保存任务失败，请重试',
-            'deleteError': '删除任务失败，请重试',
-            'updateError': '更新任务状态失败，请重试',
-            'hoursAgo': '{hours}小时前',
-            'daysAgo': '{days}天前',
-            'minutesLeft': '{minutes}分钟',
-            'hoursLeft': '{hours}小时',
-            'daysLeft': '{days}天'
-        },
-        'en': {
-            'appTitle': 'Task Tracker',
-            'appSubtitle': 'Deadline-based Task Management',
-            'export': 'Export',
-            'import': 'Import',
-            'exportTitle': 'Export data',
-            'importTitle': 'Import data',
-            'addTask': 'Add',
-            'searchPlaceholder': 'Search tasks...',
-            'filterAll': 'All',
-            'filterActive': 'Active',
-            'filterCompleted': 'Completed',
-            'filterOverdue': 'Overdue',
-            'filterNoDeadline': 'No Deadline',
-            'addNewTask': 'Add New Task',
-            'editTask': 'Edit Task',
-            'taskNameLabel': 'Task Name *',
-            'taskNamePlaceholder': 'Enter task name',
-            'taskDescLabel': 'Task Description (optional)',
-            'taskDescPlaceholder': 'Enter task description',
-            'dueDateLabel': 'Due Date (optional)',
-            'noDeadlineLabel': 'No Deadline',
-            'cancel': 'Cancel',
-            'updateTask': 'Update Task',
-            'totalTasks': 'Total Tasks',
-            'activeTasks': 'Active',
-            'completedTasks': 'Completed',
-            'tasksWithDeadline': 'With Deadline',
-            'overdueTasks': 'Overdue',
-            'tasksWithoutDeadline': 'No Deadline',
-            'noTasks': 'No Tasks',
-            'noTasksDescription': 'Click "Add Task" to start tracking your tasks',
-            'noMatchingTasks': 'No matching tasks found',
-            'noMatchingTasksDescription': 'Try adjusting your search or filters',
-            'deadline': 'Due',
-            'noDeadlineText': 'No Deadline',
-            'statusCompleted': 'Completed',
-            'statusSafe': 'Safe',
-            'statusWarning': 'Warning',
-            'statusDanger': 'Urgent',
-            'statusOverdue': 'Overdue',
-            'statusNoDeadline': 'No Deadline',
-            'markComplete': 'Mark as complete',
-            'markIncomplete': 'Mark as incomplete',
-            'editTaskTitle': 'Edit task',
-            'deleteTaskTitle': 'Delete task',
-            'confirmDelete': 'Are you sure you want to delete this task?',
-            'taskAdded': 'Task added successfully',
-            'taskUpdated': 'Task updated successfully',
-            'taskDeleted': 'Task deleted successfully',
-            'taskMarkedComplete': 'Task marked as completed',
-            'taskMarkedIncomplete': 'Task marked as incomplete',
-            'exportSuccess': 'Task data exported successfully!',
-            'importSuccess': 'Successfully imported {count} tasks!',
-            'importConfirm': 'About to import {count} tasks. Replace current data?',
-            'importFormatError': 'Import failed: Invalid file format',
-            'importReadError': 'Import failed: File read error',
-            'saveError': 'Failed to save task, please try again',
-            'deleteError': 'Failed to delete task, please try again',
-            'updateError': 'Failed to update task status, please try again',
-            'hoursAgo': '{hours} hours ago',
-            'daysAgo': '{days} days ago',
-            'minutesLeft': '{minutes} minutes',
-            'hoursLeft': '{hours} hours',
-            'daysLeft': '{days} days'
-        }
-    };
-
-    let currentLanguage = 'zh-CN';
-
     function showNotification(message, type = 'success') {
         notificationText.textContent = message;
         notification.className = 'notification';
@@ -1088,6 +953,109 @@
         });
     }
 
+
+
+    // 键名, 中文, 英文
+    const translationData = [
+        // === 头部区域 ===
+        ['appTitle',           '任务跟踪器',          'Task Tracker'],
+        ['appSubtitle',        '基于截止日期的任务管理', 'Deadline-based Task Management'],
+        ['export',             '导出',                'Export'],
+        ['import',             '导入',                'Import'],
+        ['addTask',            '添加任务',             'Add Task'],
+
+        // === 搜索和筛选 ===
+        ['searchPlaceholder',  '搜索任务...',          'Search tasks...'],
+        ['filterAll',          '全部',                'All'],
+        ['filterActive',       '进行中',              'Active'],
+        ['filterCompleted',    '已完成',              'Completed'],
+        ['filterOverdue',      '已过期',              'Overdue'],
+        ['filterNoDeadline',   '无截止日期',           'No Deadline'],
+
+        // === 弹窗表单 ===
+        ['addNewTask',         '添加新任务',           'Add New Task'],
+        ['editTask',           '编辑任务',             'Edit Task'],
+        ['taskNameLabel',      '任务名称 *',          'Task Name *'],
+        ['taskNamePlaceholder','输入任务名称',         'Enter task name'],
+        ['taskDescLabel',      '任务描述 (可选)',      'Task Description (optional)'],
+        ['taskDescPlaceholder','输入任务描述',         'Enter task description'],
+        ['dueDateLabel',       '截止日期 (可选)',      'Due Date (optional)'],
+        ['noDeadlineLabel',    '无截止日期',           'No Deadline'],
+        ['cancel',             '取消',                'Cancel'],
+        ['updateTask',         '更新任务',             'Update Task'],
+
+        // === 统计信息 ===
+        ['totalTasks',         '总任务',              'Total Tasks'],
+        ['activeTasks',        '进行中',              'Active'],
+        ['completedTasks',     '已完成',              'Completed'],
+        ['tasksWithDeadline',  '有截止日期',           'With Deadline'],
+        ['overdueTasks',       '已过期',              'Overdue'],
+        ['tasksWithoutDeadline', '无截止日期',         'No Deadline'],
+
+        // === 空状态 ===
+        ['noTasks',            '暂无任务',            'No Tasks'],
+        ['noTasksDescription', '点击"添加任务"按钮开始跟踪您的任务', 'Click "Add Task" to start tracking your tasks'],
+        ['noMatchingTasks',    '没有找到匹配的任务',    'No matching tasks found'],
+        ['noMatchingTasksDescription', '尝试调整搜索条件或筛选器', 'Try adjusting your search or filters'],
+
+        // === 任务显示 ===
+        ['deadline',           '截止',                'Due'],
+        ['noDeadlineText',     '无截止日期',           'No Deadline'],
+
+        // === 任务状态 ===
+        ['statusCompleted',    '已完成',              'Completed'],
+        ['statusSafe',         '安全',                'Safe'],
+        ['statusWarning',      '警告',                'Warning'],
+        ['statusDanger',       '紧急',                'Urgent'],
+        ['statusOverdue',      '已过期',              'Overdue'],
+        ['statusNoDeadline',   '无截止日期',           'No Deadline'],
+
+        // === 操作按钮提示 ===
+        ['markComplete',       '标记为已完成',         'Mark as complete'],
+        ['markIncomplete',     '标记为未完成',         'Mark as incomplete'],
+        ['editTaskTitle',      '编辑任务',             'Edit task'],
+        ['deleteTaskTitle',    '删除任务',             'Delete task'],
+
+        // === 确认对话框 ===
+        ['confirmDelete',      '确定要删除这个任务吗？', 'Are you sure you want to delete this task?'],
+
+        // === 通知消息 ===
+        ['taskAdded',          '任务添加成功',         'Task added successfully'],
+        ['taskUpdated',        '任务更新成功',         'Task updated successfully'],
+        ['taskDeleted',        '任务删除成功',         'Task deleted successfully'],
+        ['taskMarkedComplete', '任务标记为已完成',     'Task marked as completed'],
+        ['taskMarkedIncomplete', '任务标记为未完成',   'Task marked as incomplete'],
+        ['exportSuccess',      '任务数据导出成功！',   'Task data exported successfully!'],
+        ['importSuccess',      '成功导入 {count} 个任务！', 'Successfully imported {count} tasks!'],
+        ['importConfirm',      '即将导入 {count} 个任务。是否替换当前数据？', 'About to import {count} tasks. Replace current data?'],
+        ['importFormatError',  '导入失败：文件格式不正确', 'Import failed: Invalid file format'],
+        ['importReadError',    '导入失败：文件读取错误', 'Import failed: File read error'],
+        ['saveError',          '保存任务失败，请重试', 'Failed to save task, please try again'],
+        ['deleteError',        '删除任务失败，请重试', 'Failed to delete task, please try again'],
+        ['updateError',        '更新任务状态失败，请重试', 'Failed to update task status, please try again'],
+
+        // === 时间显示 ===
+        ['hoursAgo',           '{hours}小时前',       '{hours} hours ago'],
+        ['daysAgo',            '{days}天前',          '{days} days ago'],
+        ['minutesLeft',        '{minutes}分钟',        '{minutes} minutes'],
+        ['hoursLeft',          '{hours}小时',          '{hours} hours'],
+        ['daysLeft',           '{days}天',            '{days} days']
+    ];
+
+    // 转换为快速查找的对象
+    const translations = {
+        'zh-CN': {},
+        'en': {}
+    };
+
+    // 填充翻译对象
+    translationData.forEach(([key, zh, en]) => {
+        translations['zh-CN'][key] = zh;
+        translations['en'][key] = en;
+    });
+
+    let currentLanguage = 'zh-CN';
+
     // 初始化应用
     document.addEventListener('DOMContentLoaded', async function () {
         try {
@@ -1097,7 +1065,20 @@
             const savedLanguage = await getConfig('language');
             if (savedLanguage) {
                 currentLanguage = savedLanguage;
+            } else {
+                // 获取系统语言列表，优先使用第一个支持的语言
+                const languages = navigator.languages || [navigator.language || navigator.userLanguage];
+                // 在系统语言列表中查找支持的语言
+                const supportedLang = languages.find(lang =>
+                    lang.toLowerCase().startsWith('zh') || lang.toLowerCase().startsWith('en')
+                );
+                // 转换为支持的语言格式
+                currentLanguage = supportedLang?.toLowerCase().startsWith('zh') ? 'zh-CN' :
+                    supportedLang?.toLowerCase().startsWith('en') ? 'en' : 'zh-CN';
+
+                await setConfig('language', currentLanguage);
             }
+
             initLanguage();
 
             tasks = await getAllTasks();
