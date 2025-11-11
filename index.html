@@ -72,7 +72,7 @@
             align-items: center;
         }
 
-        .icon-btn, .add-task-btn, .lang-btn {
+        .icon-btn, .lang-btn {
             background: rgba(255, 255, 255, 0.2);
             color: white;
             border: none;
@@ -86,19 +86,83 @@
             transition: background 0.2s;
         }
 
-        .icon-btn:hover, .lang-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .add-task-btn {
+        .icon-btn {
             background: #4b6cb7;
             font-weight: 600;
         }
 
-        .add-task-btn:hover {
+        .icon-btn:hover {
             background: #3a5aa0;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 菜单 */
+        .menu {
+            display: none;
+            position: absolute;
+            top: 55px; /* 调整到 Header 区域下方 */
+            right: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 500;
+            min-width: 100px;
+            padding: 8px 0;
+        }
+
+        /* 菜单项 */
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            background: none;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .menu-item:hover {
+            background: #f0f0f0;
+        }
+
+        .menu-item svg {
+            width: 16px;
+            height: 16px;
+            color: #4b6cb7;
+            fill: none;
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: #eee;
+            margin: 8px 0;
+        }
+
+        .submenu {
+            display: none;
+            background: #fdfdfe; /* 轻微的背景色以便区分 */
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .submenu.show {
+            display: block;
+            max-height: 200px; /* 或者一个足够的高度 */
+        }
+
+        .submenu .lang-btn {
+            padding-left: 41px; /* (15px + 16px icon + 10px margin) */
+        }
+
+        /* (可选) 旋转箭头 */
+        #langMenuToggle.open svg:last-child {
+            transform: rotate(90deg);
         }
 
         /* === 3. 搜索、筛选与统计 === */
@@ -603,24 +667,33 @@
             fill: none;
         }
 
+        #lang-container {
+            display: contents;
+        }
+
         .lang-btn {
             background: rgba(255, 255, 255, 0.2);
-            color: white;
             border: none;
-            border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
             transition: background 0.2s;
-            padding: 5px 6px;
-        }
-
-        .lang-btn.active {
-            background: rgba(255, 255, 255, 0.4);
-            font-weight: bold;
+            /* 菜单内的语言按钮 */
+            color: #333; /* 覆盖 header 中的白色 */
+            background: none;
+            width: 100%;
+            text-align: left;
+            padding: 10px 15px;
+            border-radius: 0;
+            font-weight: normal;
         }
 
         .lang-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #f0f0f0;
+        }
+
+        .lang-btn.active {
+            background: #e0e0e0;
+            font-weight: bold;
         }
 
         /* === 8. 响应式布局 === */
@@ -664,7 +737,7 @@
                 align-items: flex-end;
             }
 
-            .icon-btn, .add-task-btn {
+            .icon-btn {
                 font-size: 10px;
                 padding: 6px 10px;
             }
@@ -709,31 +782,67 @@
             <p class="subtitle" data-i18n="appSubtitle">基于截止日期的任务管理</p>
         </div>
         <div class="header-actions">
-            <!-- 语言切换 -->
-            <button class="lang-btn active" data-lang="zh-CN">中文</button>
-            <button class="lang-btn" data-lang="en">English</button>
-            <!-- 导出 / 导入-->
-            <button class="icon-btn" data-i18n-title="export" id="exportBtn" title="导出">
-                <svg class="svg-no-fill" height="14" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 4V16M12 4L8 8M12 4L16 8" stroke="currentColor" stroke-width="2"/>
-                    <path d="M4 20H20" stroke="currentColor" stroke-width="2"/>
-                </svg>
-                <span data-i18n="export">导出</span>
-            </button>
-            <button class="icon-btn" data-i18n-title="import" id="importBtn" title="导入">
-                <svg class="svg-no-fill" height="14" viewBox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 20V8M12 20L8 16M12 20L16 16" stroke="currentColor" stroke-width="2"/>
-                    <path d="M4 4H20" stroke="currentColor" stroke-width="2"/>
-                </svg>
-                <span data-i18n="import">导入</span>
-            </button>
             <!-- 添加任务 -->
-            <button class="add-task-btn" id="openModalBtn">
-                <svg class="svg-no-fill" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+            <button class="icon-btn" id="openModalBtn">
+                <svg class="svg-no-fill" height="18" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-linecap="round" stroke-width="2"/>
                 </svg>
-                <span data-i18n="addTask">添加任务</span>
             </button>
+            <!-- 菜单 -->
+            <button class="icon-btn" id="openMenuBtn">
+                <svg height="18" viewBox="0 0 24 24" width="18" style="fill: currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 12C4 11.4477 4.44772 11 5 11H19C19.5523 11 20 11.4477 20 12C20 12.5523 19.5523 13 19 13H5C4.44772 13 4 12.5523 4 12Z"/>
+                    <path d="M4 6C4 5.44772 4.44772 5 5 5H19C19.5523 5 20 5.44772 20 6C20 6.55228 19.5523 7 19 7H5C4.44772 7 4 6.55228 4 6Z"/>
+                    <path d="M4 18C4 17.4477 4.44772 17 5 17H19C19.5523 17 20 17.4477 20 18C20 18.5523 19.5523 19 19 19H5C4.44772 19 4 18.5523 4 18Z"/>
+                </svg>
+            </button>
+            <div class="menu" id="menu">
+                <!-- 导出 / 导入-->
+                <button class="menu-item" data-i18n-title="export" id="exportBtn" title="导出">
+                    <svg class="svg-no-fill" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 4V16M12 4L8 8M12 4L16 8" stroke="currentColor" stroke-width="2"/>
+                        <path d="M4 20H20" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span data-i18n="export">导出</span>
+                </button>
+                <button class="menu-item" data-i18n-title="import" id="importBtn" title="导入">
+                    <svg class="svg-no-fill" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 20V8M12 20L8 16M12 20L16 16" stroke="currentColor" stroke-width="2"/>
+                        <path d="M4 4H20" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span data-i18n="import">导入</span>
+                </button>
+
+                <div class="menu-divider"></div>
+
+                <button class="menu-item" data-i18n-title="clearCompletedTitle" id="clearCompletedBtn" title="清除所有已完成的任务">
+                    <svg class="svg-no-fill" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px; color: #E53935; fill: none;">
+                        <path d="M5.75 5.75C5.75 4.7835 6.5335 4 7.5 4H16.5C17.4665 4 18.25 4.7835 18.25 5.75V8.25H5.75V5.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M4 8.25H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17.5 8.25V17.5C17.5 18.8807 16.3807 20 15 20H9C7.61929 20 6.5 18.8807 6.5 17.5V8.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9.5 11.25V16.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14.5 11.25V16.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span data-i18n="clearCompleted">清除已完成</span>
+                </button>
+
+                <div class="menu-divider"></div>
+                <!-- 语言切换 -->
+                <button class="menu-item" id="langMenuToggle">
+                    <svg viewBox="0 0 24 24" class="svg-no-fill" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px; color: #4b6cb7; fill: none;">
+                        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" stroke="currentColor" stroke-width="2"/>
+                        <path d="M2 12H22" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 2C14.7614 2 17 6.48 17 12C17 17.52 14.7614 22 12 22C9.23858 22 7 17.52 7 12C7 6.48 9.23858 2 12 2Z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span data-i18n="language" style="margin-left: 10px;">语言</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" class="svg-no-fill" style="margin-left: auto; transition: transform 0.2s;" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="submenu" id="langSubmenu">
+                    <div id="lang-container"></div>
+                </div>
+            </div>
         </div>
         <input accept=".json" class="file-input" id="importFile" onchange="importTasks(this.files[0])" type="file">
     </header>
@@ -879,56 +988,13 @@
         let taskForm, taskList, taskModal, openModalBtn, closeModalBtn, cancelBtn,
             noDeadlineCheckbox, dueDateInput, dueTimeInput, modalTitle, submitBtn,
             searchInput, notification, notificationText, taskTemplate, importBtn, exportBtn,
-            importFileInput;
+            importFileInput, openMenuBtn, menu, langMenuToggle, langSubmenu, clearCompletedBtn;
 
-        // 直接定义翻译对象
-        const translations = {
-            'zh-CN': {
-                'appTitle': '任务跟踪器', 'appSubtitle': '基于截止日期的任务管理', 'export': '导出', 'import': '导入',
-                'addTask': '添加任务', 'searchPlaceholder': '搜索任务...', 'filterAll': '全部', 'filterActive': '进行中',
-                'filterCompleted': '已完成', 'filterOverdue': '已过期', 'filterNoDeadline': '无截止日期',
-                'addNewTask': '添加新任务', 'editTask': '编辑任务', 'taskNameLabel': '任务名称 *',
-                'taskNamePlaceholder': '输入任务名称', 'taskDescLabel': '任务描述 (可选)', 'taskDescPlaceholder': '输入任务描述',
-                'dueDateLabel': '截止日期 (可选)', 'noDeadlineLabel': '无截止日期', 'cancel': '取消', 'updateTask': '更新任务',
-                'totalTasks': '总任务', 'activeTasks': '进行中', 'completedTasks': '已完成', 'tasksWithDeadline': '有截止日期',
-                'overdueTasks': '已过期', 'tasksWithoutDeadline': '无截止日期', 'noTasks': '暂无任务',
-                'noTasksDescription': '点击"添加任务"按钮开始跟踪您的任务', 'noMatchingTasks': '没有找到匹配的任务',
-                'noMatchingTasksDescription': '尝试调整搜索条件或筛选器', 'deadline': '截止', 'noDeadlineText': '无截止日期',
-                'statusCompleted': '已完成', 'statusSafe': '安全', 'statusWarning': '警告', 'statusDanger': '紧急',
-                'statusOverdue': '已过期', 'statusNoDeadline': '无截止日期', 'markComplete': '标记为已完成',
-                'markIncomplete': '标记为未完成', 'editTaskTitle': '编辑任务', 'deleteTaskTitle': '删除任务',
-                'confirmDelete': '确定要删除这个任务吗？', 'taskAdded': '任务添加成功', 'taskUpdated': '任务更新成功',
-                'taskDeleted': '任务删除成功', 'taskMarkedComplete': '任务标记为已完成', 'taskMarkedIncomplete': '任务标记为未完成',
-                'exportSuccess': '任务数据导出成功！', 'importSuccess': '成功导入 {count} 个任务！',
-                'importConfirm': '即将导入 {count} 个任务。是否替换当前数据？', 'importFormatError': '导入失败：文件格式不正确',
-                'importReadError': '导入失败：文件读取错误', 'saveError': '保存任务失败，请重试', 'deleteError': '删除任务失败，请重试',
-                'updateError': '更新任务状态失败，请重试', 'minutesAgo': '{minutes}分钟前', 'hoursAgo': '{hours}小时前',
-                'daysAgo': '{days}天前', 'minutesLeft': '{minutes}分钟', 'hoursLeft': '{hours}小时', 'daysLeft': '{days}天'
-            },
-            'en': {
-                'appTitle': 'Task Tracker', 'appSubtitle': 'Deadline-based Task Management', 'export': 'Export', 'import': 'Import',
-                'addTask': 'Add Task', 'searchPlaceholder': 'Search tasks...', 'filterAll': 'All', 'filterActive': 'Active',
-                'filterCompleted': 'Completed', 'filterOverdue': 'Overdue', 'filterNoDeadline': 'No Deadline',
-                'addNewTask': 'Add New Task', 'editTask': 'Edit Task', 'taskNameLabel': 'Task Name *',
-                'taskNamePlaceholder': 'Enter task name', 'taskDescLabel': 'Task Description (optional)', 'taskDescPlaceholder': 'Enter task description',
-                'dueDateLabel': 'Due Date (optional)', 'noDeadlineLabel': 'No Deadline', 'cancel': 'Cancel', 'updateTask': 'Update Task',
-                'totalTasks': 'Total Tasks', 'activeTasks': 'Active', 'completedTasks': 'Completed', 'tasksWithDeadline': 'With Deadline',
-                'overdueTasks': 'Overdue', 'tasksWithoutDeadline': 'No Deadline', 'noTasks': 'No Tasks',
-                'noTasksDescription': 'Click "Add Task" to start tracking your tasks', 'noMatchingTasks': 'No matching tasks found',
-                'noMatchingTasksDescription': 'Try adjusting your search or filters', 'deadline': 'Due', 'noDeadlineText': 'No Deadline',
-                'statusCompleted': 'Completed', 'statusSafe': 'Safe', 'statusWarning': 'Warning', 'statusDanger': 'Urgent',
-                'statusOverdue': 'Overdue', 'statusNoDeadline': 'No Deadline', 'markComplete': 'Mark as complete',
-                'markIncomplete': 'Mark as incomplete', 'editTaskTitle': 'Edit task', 'deleteTaskTitle': 'Delete task',
-                'confirmDelete': 'Are you sure you want to delete this task?', 'taskAdded': 'Task added successfully', 'taskUpdated': 'Task updated successfully',
-                'taskDeleted': 'Task deleted successfully', 'taskMarkedComplete': 'Task marked as completed', 'taskMarkedIncomplete': 'Task marked as incomplete',
-                'exportSuccess': 'Task data exported successfully!', 'importSuccess': 'Successfully imported {count} tasks!',
-                'importConfirm': 'About to import {count} tasks. Replace current data?', 'importFormatError': 'Import failed: Invalid file format',
-                'importReadError': 'Import failed: File read error', 'saveError': 'Failed to save task, please try again',
-                'deleteError': 'Failed to delete task, please try again', 'updateError': 'Failed to update task status, please try again',
-                'minutesAgo': '{minutes} minutes ago', 'hoursAgo': '{hours} hours ago', 'daysAgo': '{days} days ago',
-                'minutesLeft': '{minutes} minutes', 'hoursLeft': '{hours} hours', 'daysLeft': '{days} days'
-            }
-        };
+        const LANG_RESOURCES = [
+            { code: 'zh-CN', name: '简体中文' },
+            { code: 'en', name: 'English' }
+        ];
+        const translations = {};
 
         // 初始化应用
         document.addEventListener('DOMContentLoaded', async function () {
@@ -951,8 +1017,17 @@
             exportBtn = document.getElementById('exportBtn');
             importBtn = document.getElementById('importBtn');
             importFileInput = document.getElementById('importFile');
+            openMenuBtn = document.getElementById('openMenuBtn');
+            menu = document.getElementById('menu');
+            langMenuToggle = document.getElementById('langMenuToggle');
+            langSubmenu = document.getElementById('langSubmenu');
+            clearCompletedBtn = document.getElementById('clearCompletedBtn');
 
             try {
+                // 加载翻译
+                await loadTranslations();
+                createLangButtons();
+
                 await initDB();
                 // 从配置中获取语言设置
                 const savedLanguage = await getConfig('language');
@@ -962,12 +1037,13 @@
                     // 获取系统语言列表，优先使用第一个支持的语言
                     const languages = navigator.languages || [navigator.language || navigator.userLanguage];
                     // 在系统语言列表中查找支持的语言
-                    const supportedLang = languages.find(lang =>
-                        lang.toLowerCase().startsWith('zh') || lang.toLowerCase().startsWith('en')
-                    );
-                    // 转换为支持的语言格式
-                    currentLanguage = supportedLang?.toLowerCase().startsWith('zh') ? 'zh-CN' :
-                        supportedLang?.toLowerCase().startsWith('en') ? 'en' : 'zh-CN';
+                    const supportedLang = languages.find(lang => translations[lang] || translations[lang.split('-')[0]]);
+                    currentLanguage = supportedLang
+                        ? translations[supportedLang] ? supportedLang : supportedLang.split('-')[0]
+                        : LANG_RESOURCES[0]?.code || 'en';
+                    if (!translations[currentLanguage]) {
+                        currentLanguage = Object.keys(translations)[0]; // 最后的备用
+                    }
                     await setConfig('language', currentLanguage);
                 }
 
@@ -1021,6 +1097,31 @@
             searchInput.addEventListener('keyup', filterTasks);
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.addEventListener('click', () => setFilter(btn.dataset.filter));
+            });
+
+            clearCompletedBtn.addEventListener('click', clearCompletedTasks);
+
+            // 菜单
+            openMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menu.style.display = (menu.style.display === 'none' ? 'block' : 'none');
+                if (menu.style.display === 'none') {
+                    langSubmenu.classList.remove('show');
+                    langMenuToggle.classList.remove('open');
+                }
+            })
+            // 点击外部关闭菜单
+            document.addEventListener('click', function(e) {
+                if (menu.style.display === 'block' && !menu.contains(e.target) && !openMenuBtn.contains(e.target)) {
+                    menu.style.display = 'none';
+                    langSubmenu.classList.remove('show');
+                    langMenuToggle.classList.remove('open');
+                }
+            });
+            langMenuToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                langSubmenu.classList.toggle('show');
+                langMenuToggle.classList.toggle('open');
             });
 
             // 语言切换
@@ -1152,6 +1253,45 @@
         }
 
         // --- 语言与国际化 ---
+        async function loadTranslations() {
+            try {
+                const fetchPromises = LANG_RESOURCES.map(lang =>
+                    fetch(`./resources/${lang.code}.json`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`[${response.status}] Failed to load ${lang.code}.json`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            translations[lang.code] = data; // 填充全局翻译对象
+                        })
+                );
+
+                await Promise.all(fetchPromises);
+
+                if (Object.keys(translations).length === 0) {
+                    throw new Error('没有找到语言文件');
+                }
+            } catch (error) {
+                console.error('加载语言失败: ', error);
+                // 必须使用一个“硬编码”的后备消息
+                showNotification('Failed to load language resources. Please refresh.', 'error');
+            }
+        }
+        function createLangButtons() {
+            const container = document.getElementById('lang-container');
+            if (!container) return;
+
+            LANG_RESOURCES.forEach(lang => {
+                const btn = document.createElement('button');
+                btn.className = 'lang-btn';
+                btn.dataset.lang = lang.code;
+                btn.textContent = lang.name;
+                container.appendChild(btn);
+            });
+        }
+
         function initLanguage() {
             document.querySelectorAll('.lang-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.lang === currentLanguage);
@@ -1161,7 +1301,18 @@
         }
 
         function applyTranslations() {
-            const langMap = translations[currentLanguage];
+            let langMap = translations[currentLanguage];
+            if (!langMap) {
+                console.warn(`No translations found for language: ${currentLanguage}. Using default.`);
+                // 尝试使用第一个可用的翻译
+                const fallbackLang = Object.keys(translations)[0];
+                if (!fallbackLang) {
+                    console.error("No translations available at all.");
+                    return; // 无法渲染
+                }
+                currentLanguage = fallbackLang;
+                langMap = translations[currentLanguage];
+            }
             document.querySelectorAll('[data-i18n]').forEach(element => {
                 const key = element.getAttribute('data-i18n');
                 if (langMap[key]) element.textContent = langMap[key];
@@ -1214,6 +1365,7 @@
 
         async function handleFormSubmit(e) {
             e.preventDefault();
+            const langMap = translations[currentLanguage];
 
             const taskName = document.getElementById('taskName').value;
             const taskDesc = document.getElementById('taskDesc').value;
@@ -1240,7 +1392,7 @@
                         createdAt: existingTask.createdAt // 保留原始创建时间
                     };
                     await updateTaskInDB(updatedTask);
-                    showNotification(translations[currentLanguage]['taskUpdated']);
+                    showNotification(langMap['taskUpdated']);
                 } else {
                     const newTask = {
                         id: Date.now(),
@@ -1248,7 +1400,7 @@
                         createdAt: new Date().toISOString() // 设置新创建时间
                     };
                     await addTaskToDB(newTask);
-                    showNotification(translations[currentLanguage]['taskAdded']);
+                    showNotification(langMap['taskAdded']);
                 }
 
                 tasks = await getAllTasks();
@@ -1257,7 +1409,36 @@
                 closeModal();
             } catch (error) {
                 console.error('保存任务失败:', error);
-                showNotification(translations[currentLanguage]['saveError'], 'error');
+                showNotification(langMap['saveError'], 'error');
+            }
+        }
+        async function clearCompletedTasks() {
+            const langMap = translations[currentLanguage];
+            const completedTasks = tasks.filter(task => task.completed);
+
+            if (completedTasks.length === 0) {
+                showNotification(langMap['noCompletedTasks'], 'warning');
+                return;
+            }
+
+            const confirmMessage = (langMap['confirmClearCompleted']).replace('{count}', completedTasks.length.toString());
+
+            if (confirm(confirmMessage)) {
+                try {
+                    const deletionPromises = completedTasks.map(task => deleteTaskFromDB(task.id));
+                    await Promise.all(deletionPromises);
+
+                    tasks = tasks.filter(task => !task.completed);
+
+                    renderStats();
+                    renderTasks();
+
+                    const successMessage = (langMap['completedTasksCleared']).replace('{count}', completedTasks.length);
+                    showNotification(successMessage);
+                } catch (error) {
+                    console.error('清除已完成任务失败:', error);
+                    showNotification(langMap['clearCompletedError'], "error");
+                }
             }
         }
 
@@ -1294,17 +1475,18 @@
         }
 
         async function deleteTask(id) {
-            const confirmMessage = translations[currentLanguage]['confirmDelete'];
+            const langMap = translations[currentLanguage];
+            const confirmMessage = langMap['confirmDelete'];
             if (confirm(confirmMessage)) {
                 try {
                     await deleteTaskFromDB(id);
                     tasks = tasks.filter(task => task.id !== id);
                     renderStats();
                     renderTasks();
-                    showNotification(translations[currentLanguage]['taskDeleted']);
+                    showNotification(langMap['taskDeleted']);
                 } catch (error) {
                     console.error('删除任务失败:', error);
-                    showNotification(translations[currentLanguage]['deleteError'], 'error');
+                    showNotification(langMap['deleteError'], 'error');
                 }
             }
         }
@@ -1312,6 +1494,7 @@
         async function toggleTaskComplete(id) {
             const task = tasks.find(t => t.id === id);
             if (!task) return;
+            const langMap = translations[currentLanguage];
 
             const updatedTask = {...task, completed: !task.completed};
 
@@ -1324,15 +1507,15 @@
                 if (updatedTask.completed) {
                     taskElement.classList.add('animate-complete');
                     setTimeout(() => taskElement.classList.remove('animate-complete'), 500);
-                    showNotification(translations[currentLanguage]['taskMarkedComplete']);
+                    showNotification(langMap['taskMarkedComplete']);
                 } else {
-                    showNotification(translations[currentLanguage]['taskMarkedIncomplete']);
+                    showNotification(langMap['taskMarkedIncomplete']);
                 }
 
                 renderTasks();
             } catch (error) {
                 console.error('更新任务状态失败:', error);
-                showNotification(translations[currentLanguage]['updateError'], 'error');
+                showNotification(langMap['updateError'], 'error');
             }
         }
 
@@ -1344,6 +1527,9 @@
 
         function renderStats() {
             const statsContainer = document.getElementById('statsContainer');
+            const langMap = translations[currentLanguage];
+            if (!langMap) return;
+
             const totalTasks = tasks.length;
             const activeTasks = tasks.filter(task => !task.completed).length;
             const completedTasks = tasks.filter(task => task.completed).length;
@@ -1352,7 +1538,6 @@
                 return !task.completed && task.dueDate && new Date(task.dueDate) < new Date();
             }).length;
 
-            const langMap = translations[currentLanguage];
             statsContainer.innerHTML = `
             <div class="stat-item"><div class="stat-value">${totalTasks}</div><div class="stat-label">${langMap['totalTasks']}</div></div>
             <div class="stat-item"><div class="stat-value">${activeTasks}</div><div class="stat-label">${langMap['activeTasks']}</div></div>
@@ -1392,6 +1577,7 @@
         // 使用 <template> 渲染
         function renderTasks() {
             const langMap = translations[currentLanguage];
+            if (!langMap) return;
 
             if (tasks.length === 0) {
                 taskList.innerHTML = `
