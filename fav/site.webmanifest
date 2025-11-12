@@ -1,6 +1,6 @@
 {
-    "name": "",
-    "short_name": "",
+    "name": "Task Tracker",
+    "short_name": "Todo",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
