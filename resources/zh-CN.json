@@ -2,6 +2,7 @@
   "language": "简体中文",
   "appTitle": "任务跟踪器",
   "appSubtitle": "基于截止日期的任务管理",
+
   "export": "导出",
   "import": "导入",
   "addTask": "添加任务",
@@ -14,6 +15,11 @@
   "filterNoDeadline": "无截止日期",
 
   "addNewTask": "添加新任务",
+  "addNewTaskTooltip": "添加新任务 (Ctrl+I)",
+  "menuTooltip": "菜单 (Ctrl+M)",
+  "themeTooltip": "切换主题",
+  "backToTopTooltip": "回到顶部 (Alt + T)",
+
   "editTask": "编辑任务",
   "taskNameLabel": "任务名称 *",
   "taskNamePlaceholder": "输入任务名称",

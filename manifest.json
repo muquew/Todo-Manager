@@ -1,0 +1,21 @@
+{
+  "name": "Task Tracer",
+  "short_name": "TaskTracer",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4b6cb7",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "fav/android-chrome-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "fav/android-chrome-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

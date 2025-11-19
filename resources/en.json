@@ -2,6 +2,7 @@
   "language": "English",
   "appTitle": "Task Tracker",
   "appSubtitle": "Deadline-based Task Management",
+
   "export": "Export",
   "import": "Import",
   "addTask": "Add Task",
@@ -12,6 +13,11 @@
   "filterOverdue": "Overdue",
   "filterNoDeadline": "No Deadline",
   "addNewTask": "Add New Task",
+  "addNewTaskTooltip": "Add New Task (Ctrl+I)",
+  "menuTooltip": "Menu (Ctrl+M)",
+  "themeTooltip": "Change Theme",
+  "backToTopTooltip": "back to top (Alt + T)",
+
   "editTask": "Edit Task",
   "taskNameLabel": "Task Name *",
   "taskNamePlaceholder": "Enter task name",
