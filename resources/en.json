@@ -27,6 +27,9 @@
   "noDeadlineLabel": "No Deadline",
   "cancel": "Cancel",
   "updateTask": "Update Task",
+  "subTasks": "Subtasks",
+  "subtasksLabel": "Subtasks (optional)",
+  "subtaskPlaceholder": "Enter subtasks...",
 
   "noTasks": "No Tasks",
   "noTasksDescription": "Click \"Add Task\" to start tracking your tasks",

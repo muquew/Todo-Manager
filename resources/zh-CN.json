@@ -27,6 +27,9 @@
   "taskDescPlaceholder": "输入任务描述",
   "dueDateLabel": "截止日期 (可选)",
   "noDeadlineLabel": "无截止日期",
+  "subTasks": "子任务",
+  "subtasksLabel": "子任务 (可选)",
+  "subtaskPlaceholder": "输入子任务...",
 
   "openMenu": "打开菜单",
   "dueTimeLabel": "截止时间",
