@@ -182,6 +182,8 @@
         .dropdown-option svg { opacity: 0; color: var(--color-primary); }
         .dropdown-option.selected svg { opacity: 1; }
 
+        .filter-count { margin-left: auto; opacity: 0.6; font-size: 12px; padding-left: 8px; }
+
         /* === Tasks === */
         .tasks-section { margin-bottom: 25px; }
         .task-item { --task-color: var(--color-primary); background: var(--bg-surface); border-left: 5px solid var(--task-color); border-radius: 8px; padding: 15px; margin-bottom: 12px; box-shadow: 0 3px 10px var(--shadow-base); transition: transform 0.2s; position: relative; overflow: hidden; }
@@ -398,11 +400,11 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" class="svg-no-fill chevron" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
                 </button>
                 <div class="dropdown-menu-content">
-                    <button class="dropdown-option" data-filter="all"><span data-i18n="filterAll">全部</span></button>
-                    <button class="dropdown-option selected" data-filter="active"><span data-i18n="filterActive">进行中</span></button>
-                    <button class="dropdown-option" data-filter="completed"><span data-i18n="filterCompleted">已完成</span></button>
-                    <button class="dropdown-option" data-filter="overdue"><span data-i18n="filterOverdue">已过期</span></button>
-                    <button class="dropdown-option" data-filter="no-deadline"><span data-i18n="filterNoDeadline">无截止日期</span></button>
+                    <button class="dropdown-option" data-filter="all"><span data-i18n="filterAll">全部</span><span class="filter-count" id="count-all">(0)</span></button>
+                    <button class="dropdown-option selected" data-filter="active"><span data-i18n="filterActive">进行中</span><span class="filter-count" id="count-active">(0)</span></button>
+                    <button class="dropdown-option" data-filter="completed"><span data-i18n="filterCompleted">已完成</span><span class="filter-count" id="count-completed">(0)</span></button>
+                    <button class="dropdown-option" data-filter="overdue"><span data-i18n="filterOverdue">已过期</span><span class="filter-count" id="count-overdue">(0)</span></button>
+                    <button class="dropdown-option" data-filter="no-deadline"><span data-i18n="filterNoDeadline">无截止日期</span><span class="filter-count" id="count-no-deadline">(0)</span></button>
                 </div>
             </div>
             <div class="dropdown-container" id="sortDropdown">
@@ -934,14 +936,39 @@
         // 6. UI 渲染 (Rendering)
         // ==========================================
 
-        // --- 1. 计算统计 (保持不变) ---
-        // const totalTasks = tasks.length;
-        // const activeTasks = tasks.filter(task => !task.completed).length;
-        // const completedTasks = tasks.filter(task => task.completed).length;
-        // const tasksWithoutDeadline = tasks.filter(task => !task.dueDate).length;
-        // const overdueTasks = tasks.filter(task => {
-        //     return !task.completed && task.dueDate && new Date(task.dueDate) < new Date();
-        // }).length;
+        function updateFilterCounts() {
+            // 1. 计算各个状态的数量
+            const counts = {
+                all: state.tasks.length,
+                active: 0,
+                completed: 0,
+                overdue: 0,
+                'no-deadline': 0
+            };
+            const now = new Date();
+            // 一次遍历
+            state.tasks.forEach(task => {
+                if (task.completed) counts.completed++;
+                else {
+                    counts.active++; // 未完成即为 active
+                    if (task.dueDate) {
+                        if (utils.utcToLocal(task.dueDate) < now) counts.overdue++;
+                    } else counts['no-deadline']++;
+                }
+            });
+
+            // 2. 更新 DOM
+            // 使用 ID 选择器快速更新
+            const setObjText = (id, count) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = `(${count})`;
+            };
+            setObjText('count-all', counts.all);
+            setObjText('count-active', counts.active);
+            setObjText('count-completed', counts.completed);
+            setObjText('count-overdue', counts.overdue);
+            setObjText('count-no-deadline', counts['no-deadline']);
+        }
 
         function renderTaskList() {
             const t = state.translations[state.currentLanguage];
@@ -951,6 +978,8 @@
                 DOM.taskList.innerHTML = getEmptyStateHTML(t);
                 return;
             }
+
+            updateFilterCounts();
 
             // 1. 筛选与排序
             let result = state.tasks.filter(task => {
