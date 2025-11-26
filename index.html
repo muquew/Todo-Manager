@@ -567,13 +567,49 @@
     (function() {
         // 配置与状态 (Config & State)
         const CONFIG = {
-            DB_NAME: 'TaskTrackerDB',
-            DB_VERSION: 2,
-            STORE_TASKS: 'tasks',
-            STORE_CONFIG: 'config',
+            // 数据库配置
+            DB: {
+                NAME: 'TaskTrackerDB',
+                VERSION: 2,
+                STORES: {
+                    TASKS: 'tasks',
+                    CONFIG: 'config'
+                }
+            },
+            // 本地存储键名
+            STORAGE: {
+                THEME: 'theme',
+                LANG: 'language'
+            },
+            // UI 类名与状态常量
+            UI: {
+                CLASSES: {
+                    SHOW: 'show',
+                    OPEN: 'open',
+                    ACTIVE: 'active',
+                    SELECTED: 'selected',
+                    EXPANDED: 'expanded',
+                    COMPLETED: 'completed',
+                    ANIMATE: 'animate-complete'
+                },
+                STATUS: {
+                    SAFE: 'status-safe',
+                    WARNING: 'status-warning',
+                    DANGER: 'status-danger',
+                    OVERDUE: 'status-overdue',
+                    NO_DEADLINE: 'status-no-deadline',
+                    COMPLETED: 'status-completed'
+                }
+            },
+            // 默认值
+            DEFAULTS: {
+                LANG: 'zh-CN',
+                TIME: '23:59'
+            },
             LANGUAGES: [
                 { code: 'zh-CN', name: '简体中文' },
-                { code: 'en', name: 'English' }]
+                { code: 'en', name: 'English' }
+            ]
         };
 
         const state = {
@@ -691,15 +727,15 @@
         }
 
         async function loadSettings() {
-            const savedLang = await dbActions.getConfig('language');
+            const savedLang = await dbActions.getConfig(CONFIG.STORAGE.LANG);
             if (savedLang) {
                 state.currentLanguage = savedLang;
             } else {
                 // 自动检测语言
                 const sysLang = navigator.languages || [navigator.language];
                 const target = CONFIG.LANGUAGES.find(l => l.code === sysLang || l.code === sysLang[0].split('-')[0]);
-                state.currentLanguage = target ? target.code : 'zh-CN';
-                await dbActions.setConfig('language', state.currentLanguage);
+                state.currentLanguage = target ? target.code : CONFIG.DEFAULTS.LANG;
+                await dbActions.setConfig(CONFIG.STORAGE.LANG, state.currentLanguage);
             }
         }
 
@@ -708,7 +744,7 @@
         function bindEvents() {
             // 全局
             DOM.themeBtn.addEventListener('click', utils.toggleTheme);
-            window.addEventListener('scroll', () => DOM.backToTopBtn.classList.toggle('show', window.scrollY > 300));
+            window.addEventListener('scroll', () => DOM.backToTopBtn.classList.toggle(CONFIG.UI.CLASSES.SHOW, window.scrollY > 300));
             DOM.backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
             document.addEventListener('keydown', handleKeyboardShortcuts);
             document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -726,7 +762,7 @@
                 DOM.inputs.time.disabled = this.checked;
                 if (this.checked) {
                     DOM.inputs.date.value = new Date().toISOString().split('T')[0];
-                    DOM.inputs.time.value = '23:59';
+                    DOM.inputs.time.value = CONFIG.DEFAULTS.TIME;
                 }
             });
 
@@ -743,15 +779,15 @@
             // 主菜单
             DOM.menu.btn.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(DOM.menu.container, DOM.menu.btn); });
             document.addEventListener('click', (e) => {
-                if (DOM.menu.container.classList.contains('show') && !DOM.menu.container.contains(e.target) && !DOM.menu.btn.contains(e.target)) {
+                if (DOM.menu.container.classList.contains(CONFIG.UI.CLASSES.SHOW) && !DOM.menu.container.contains(e.target) && !DOM.menu.btn.contains(e.target)) {
                     closeMenu();
                 }
             });
             // 语言子菜单
             DOM.menu.langToggle.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const isExpanded = DOM.menu.langSubmenu.classList.toggle('show');
-                DOM.menu.langToggle.classList.toggle('open', isExpanded);
+                const isExpanded = DOM.menu.langSubmenu.classList.toggle(CONFIG.UI.CLASSES.SHOW);
+                DOM.menu.langToggle.classList.toggle(CONFIG.UI.CLASSES.OPEN, isExpanded);
                 DOM.menu.langToggle.setAttribute('aria-expanded', isExpanded.toString());
             });
             DOM.menu.langContainer.addEventListener('click', (e) => {
@@ -903,8 +939,8 @@
             // 动画反馈
             const el = document.querySelector(`.task-item[data-task-id="${id}"]`);
             if (el && task.completed) {
-                el.classList.add('animate-complete');
-                setTimeout(() => el.classList.remove('animate-complete'), 500);
+                el.classList.add(CONFIG.UI.CLASSES.ANIMATE);
+                setTimeout(() => el.classList.remove(CONFIG.UI.CLASSES.ANIMATE), 500);
             }
 
             const t = state.translations[state.currentLanguage];
@@ -954,7 +990,7 @@
                 if (checkbox) {
                     checkbox.checked = sub.completed;
                     const row = checkbox.closest('.subtask-display-item');
-                    if (row) row.classList.toggle('completed', sub.completed);
+                    if (row) row.classList.toggle(CONFIG.UI.CLASSES.COMPLETED, sub.completed);
                 }
 
                 // 更新顶部计数 1/3
@@ -1105,12 +1141,12 @@
             // A. 状态计算
             let statusObj;
             let timeLeft = null;
-            if (task.completed) statusObj = { cls: 'status-completed', text: t['statusCompleted'], percent: 100 };
+            if (task.completed) statusObj = { cls: CONFIG.UI.CLASSES.COMPLETED, text: t['statusCompleted'], percent: 100 };
             else if (task.dueDate) {
                 timeLeft = utils.calculateTimeLeft(task.dueDate);
                 statusObj = utils.getStatus(timeLeft);
             } else {
-                statusObj = { cls: 'status-no-deadline', text: t['statusNoDeadline'], percent: 0 };
+                statusObj = { cls: CONFIG.UI.CLASSES.NO_DEADLINE, text: t['statusNoDeadline'], percent: 0 };
             }
 
             // B. 基础信息
@@ -1189,7 +1225,7 @@
 
             // 每次都重绘内部 HTML，因为状态可能变了
             // 注意：我们使用 innerHTML 重绘，这会导致折叠状态丢失，所以需要先保存状态
-            const wasExpanded = wrapper.classList.contains('expanded');
+            const wasExpanded = wrapper.classList.contains(CONFIG.UI.CLASSES.EXPANDED);
 
             wrapper.innerHTML = `
                 <div class="subtask-summary-bar">
@@ -1201,7 +1237,7 @@
                 </div>
                 <div class="subtasks-list">
                     ${task.subtasks.map(sub => `
-                        <div class="subtask-display-item ${sub.completed ? 'completed' : ''}">
+                        <div class="subtask-display-item ${sub.completed ? CONFIG.UI.CLASSES.COMPLETED : ''}">
                             <input type="checkbox" class="subtask-checkbox" data-subtask-id="${sub.id}" ${sub.completed ? 'checked' : ''}>
                             <span class="subtask-text">${utils.escapeHTML(sub.text)}</span>
                         </div>
@@ -1210,7 +1246,7 @@
             `;
 
             // 恢复折叠状态
-            if (wasExpanded) wrapper.classList.add('expanded');
+            if (wasExpanded) wrapper.classList.add(CONFIG.UI.CLASSES.EXPANDED);
         }
 
         function renderSubtaskPreview() {
@@ -1279,7 +1315,7 @@
                     DOM.inputs.date.disabled = true;
                     DOM.inputs.time.disabled = true;
                     DOM.inputs.date.value = new Date().toISOString().split('T')[0];
-                    DOM.inputs.time.value = '23:59';
+                    DOM.inputs.time.value = CONFIG.DEFAULTS.TIME;
                 }
             } else {
                 state.editingTaskId = null;
@@ -1291,7 +1327,7 @@
                 DOM.inputs.date.disabled = false;
                 DOM.inputs.time.disabled = false;
                 DOM.inputs.date.value = new Date().toISOString().split('T')[0];
-                DOM.inputs.time.value = '23:59';
+                DOM.inputs.time.value = CONFIG.DEFAULTS.TIME;
             }
 
             renderSubtaskPreview();
@@ -1337,26 +1373,26 @@
         // ==========================================
         const dbActions = {
             init: () => new Promise((resolve, reject) => {
-                const req = indexedDB.open(CONFIG.DB_NAME, CONFIG.DB_VERSION);
+                const req = indexedDB.open(CONFIG.DB.NAME, CONFIG.DB.VERSION);
                 req.onerror = () => reject(req.error);
                 req.onsuccess = () => { state.db = req.result; resolve(state.db); };
                 req.onupgradeneeded = (e) => {
                     const db = e.target.result;
-                    if (!db.objectStoreNames.contains(CONFIG.STORE_TASKS)) { // 创建任务存储
-                        const store = db.createObjectStore(CONFIG.STORE_TASKS, { keyPath: 'id' });
+                    if (!db.objectStoreNames.contains(CONFIG.DB.STORES.TASKS)) { // 创建任务存储
+                        const store = db.createObjectStore(CONFIG.DB.STORES.TASKS, { keyPath: 'id' });
                         store.createIndex('dueDate', 'dueDate', { unique: false });
                     }
-                    if (!db.objectStoreNames.contains(CONFIG.STORE_CONFIG)) { // 创建配置存储
-                        db.createObjectStore(CONFIG.STORE_CONFIG, { keyPath: 'key' });
+                    if (!db.objectStoreNames.contains(CONFIG.DB.STORES.CONFIG)) { // 创建配置存储
+                        db.createObjectStore(CONFIG.DB.STORES.CONFIG, { keyPath: 'key' });
                     }
                 };
             }),
-            getAllTasks: () => utils.dbOp(CONFIG.STORE_TASKS, 'readonly', s => s.getAll()),
-            addTask: (task) => utils.dbOp(CONFIG.STORE_TASKS, 'readwrite', s => s.add(task)),
-            updateTask: (task) => utils.dbOp(CONFIG.STORE_TASKS, 'readwrite', s => s.put(task)),
-            deleteTask: (id) => utils.dbOp(CONFIG.STORE_TASKS, 'readwrite', s => s.delete(id)),
-            getConfig: (key) => utils.dbOp(CONFIG.STORE_CONFIG, 'readonly', s => s.get(key)).then(res => res ? res.value : null),
-            setConfig: (key, value) => utils.dbOp(CONFIG.STORE_CONFIG, 'readwrite', s => s.put({ key, value }))
+            getAllTasks: () => utils.dbOp(CONFIG.DB.STORES.TASKS, 'readonly', s => s.getAll()),
+            addTask: (task) => utils.dbOp(CONFIG.DB.STORES.TASKS, 'readwrite', s => s.add(task)),
+            updateTask: (task) => utils.dbOp(CONFIG.DB.STORES.TASKS, 'readwrite', s => s.put(task)),
+            deleteTask: (id) => utils.dbOp(CONFIG.DB.STORES.TASKS, 'readwrite', s => s.delete(id)),
+            getConfig: (key) => utils.dbOp(CONFIG.DB.STORES.CONFIG, 'readonly', s => s.get(key)).then(res => res ? res.value : null),
+            setConfig: (key, value) => utils.dbOp(CONFIG.DB.STORES.CONFIG, 'readwrite', s => s.put({ key, value }))
         };
         // 别名，为了向后兼容 initApp 调用
         const initDB = dbActions.init;
@@ -1378,7 +1414,7 @@
                 DOM.notification.text.textContent = msg;
                 DOM.notification.el.className = `notification ${type} show`;
                 DOM.notification.el.setAttribute('role', (type === 'error' || type === 'warning') ? 'alert' : 'status');
-                setTimeout(() => DOM.notification.el.classList.remove('show'), 3000);
+                setTimeout(() => DOM.notification.el.classList.remove(CONFIG.UI.CLASSES.SHOW), 3000);
             },
             confirm: (title, msg, onConfirm) => {
                 DOM.modalTitle.textContent = title;
@@ -1414,7 +1450,7 @@
                 const html = document.documentElement;
                 const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
                 html.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
+                localStorage.setItem(CONFIG.STORAGE.THEME, newTheme);
             },
 
             // 时间计算
@@ -1461,15 +1497,16 @@
             // 根据剩余时间获取状态
             getStatus: (min) => {
                 const t = state.translations[state.currentLanguage];
+                const S = CONFIG.UI.STATUS;
                 // 关键分钟数：3天=4320, 7天=10080, 37天=53280
                 // --- 状态: 已过期 (Overdue) ---
-                if (min < 0) return { cls: 'status-danger', text: t['statusOverdue'], percent: 100 };
+                if (min < 0) return { cls: S.OVERDUE, text: t['statusOverdue'], percent: 100 };
                 // --- 状态: 危险 (Danger) --- (窗口: 0 - 3天 / 4320分钟)
-                if (min <= 4320) return { cls: 'status-danger', text: t['statusDanger'], percent: Math.min(100, ((4320 - min)/4320)*100) };
+                if (min <= 4320) return { cls: S.DANGER, text: t['statusDanger'], percent: Math.min(100, ((4320 - min)/4320)*100) };
                 // --- 状态: 警告 (Warning) --- (窗口: 3 - 7天 / 5760分钟)
-                if (min <= 10080) return { cls: 'status-warning', text: t['statusWarning'], percent: Math.min(100, ((10080 - min)/5760)*100) };
+                if (min <= 10080) return { cls: S.WARNING, text: t['statusWarning'], percent: Math.min(100, ((10080 - min)/5760)*100) };
                 // --- 状态: 安全 (Safe) --- (窗口: 7 - 37天 / 43200分钟)
-                return { cls: 'status-safe', text: t['statusSafe'], percent: Math.min(100, Math.max(0, ((53280 - min)/43200)*100)) };
+                return { cls: S.SAFE, text: t['statusSafe'], percent: Math.min(100, Math.max(0, ((53280 - min)/43200)*100)) };
             },
 
             sortTasks: (list) => {
@@ -1535,14 +1572,14 @@
         function setupDropdowns() {
             // 辅助：切换显示
             const toggle = (c, b) => {
-                const opening = !c.classList.contains('show');
+                const opening = !c.classList.contains(CONFIG.UI.CLASSES.SHOW);
                 // 关闭其他
                 Object.values(DOM.dropdowns).forEach(d => {
-                    d.container.classList.remove('show');
+                    d.container.classList.remove(CONFIG.UI.CLASSES.SHOW);
                     d.btn.setAttribute('aria-expanded', 'false');
                 });
                 if (opening) {
-                    c.classList.add('show');
+                    c.classList.add(CONFIG.UI.CLASSES.SHOW);
                     b.setAttribute('aria-expanded', 'true');
                 }
             };
@@ -1573,7 +1610,7 @@
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.dropdown-container')) {
                     Object.values(DOM.dropdowns).forEach(d => {
-                        d.container.classList.remove('show');
+                        d.container.classList.remove(CONFIG.UI.CLASSES.SHOW);
                         d.btn.setAttribute('aria-expanded', 'false');
                     });
                 }
@@ -1592,11 +1629,11 @@
 
         function updateDropdownUI(container, selected, btn) {
             // 移除旧的 selected
-            container.querySelectorAll('.dropdown-option').forEach(o => o.classList.remove('selected'));
+            container.querySelectorAll('.dropdown-option').forEach(o => o.classList.remove(CONFIG.UI.CLASSES.SELECTED));
             // 添加新的 selected
-            selected.classList.add('selected');
+            selected.classList.add(CONFIG.UI.CLASSES.SELECTED);
             // 关闭菜单
-            container.classList.remove('show');
+            container.classList.remove(CONFIG.UI.CLASSES.SHOW);
             btn.setAttribute('aria-expanded', 'false');
             // 更新文字
             const span = selected.querySelector('span');
@@ -1607,18 +1644,18 @@
         }
 
         function toggleMenu(menu, btn) {
-            const opening = !menu.classList.contains('show');
+            const opening = !menu.classList.contains(CONFIG.UI.CLASSES.SHOW);
             if (opening) {
-                menu.classList.add('show');
+                menu.classList.add(CONFIG.UI.CLASSES.SHOW);
                 btn.setAttribute('aria-expanded', 'true');
             } else closeMenu();
         }
 
         function closeMenu() {
-            DOM.menu.container.classList.remove('show');
+            DOM.menu.container.classList.remove(CONFIG.UI.CLASSES.SHOW);
             DOM.menu.btn.setAttribute('aria-expanded', 'false');
-            DOM.menu.langSubmenu.classList.remove('show');
-            DOM.menu.langToggle.classList.remove('open');
+            DOM.menu.langSubmenu.classList.remove(CONFIG.UI.CLASSES.SHOW);
+            DOM.menu.langToggle.classList.remove(CONFIG.UI.CLASSES.OPEN);
             DOM.menu.langToggle.setAttribute('aria-expanded', 'false');
         }
 
@@ -1644,7 +1681,7 @@
             // 2. 折叠子任务
             const summary = e.target.closest('.subtask-summary-bar');
             if (summary) {
-                summary.closest('.subtasks-wrapper').classList.toggle('expanded');
+                summary.closest('.subtasks-wrapper').classList.toggle(CONFIG.UI.CLASSES.EXPANDED);
                 return;
             }
 
@@ -1695,7 +1732,7 @@
         }
 
         function initLanguage() {
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === state.currentLanguage));
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle(CONFIG.UI.CLASSES.ACTIVE, b.dataset.lang === state.currentLanguage));
             document.documentElement.lang = state.currentLanguage;
             utils.applyTranslations();
         }
@@ -1703,7 +1740,7 @@
         function switchLanguage(code) {
             if (!state.translations[code]) return;
             state.currentLanguage = code;
-            dbActions.setConfig('language', code);
+            dbActions.setConfig(CONFIG.STORAGE.LANG, code);
             initLanguage();
         }
 
@@ -1737,9 +1774,9 @@
 
                 // C. 更新颜色类名 (只在类名改变时操作，减少 DOM 写入)
                 // 移除旧的状态类 (safe, warning, danger, overdue)
-                const classesToRemove = ['status-safe', 'status-warning', 'status-danger', 'status-overdue'];
+                const allStatusClasses = Object.values(CONFIG.UI.STATUS);
                 if (!el.classList.contains(statusObj.cls)) {
-                    el.classList.remove(...classesToRemove);
+                    el.classList.remove(...allStatusClasses); // 移除所有已知的状态类
                     el.classList.add(statusObj.cls);
                 }
 
@@ -1783,8 +1820,8 @@
                         return;
                     }
                     utils.confirm(t['import'], t['importConfirm'].replace('{count}', data.tasks.length), async () => {
-                        const tx = state.db.transaction([CONFIG.STORE_TASKS], 'readwrite');
-                        tx.objectStore(CONFIG.STORE_TASKS).clear();
+                        const tx = state.db.transaction([CONFIG.DB.STORES.TASKS], 'readwrite');
+                        tx.objectStore(CONFIG.DB.STORES.TASKS).clear();
                         for (const task of data.tasks) {
                             const safeTask = {
                                 ...task,
