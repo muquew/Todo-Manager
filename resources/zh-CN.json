@@ -97,5 +97,6 @@
   "sortSmart": "智能排序",
   "sortCreated": "新创建",
   "sortDue": "截止日期",
-  "sortAlpha": "名称 (A-Z)"
+  "sortAlpha": "名称 (A-Z)",
+  "sortManual": "自定义排序"
 }

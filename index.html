@@ -186,7 +186,8 @@
 
         /* === Tasks === */
         .tasks-section { margin-bottom: 25px; }
-        .task-item { content-visibility: auto; --task-color: var(--color-primary); background: var(--bg-surface); border-left: 5px solid var(--task-color); border-radius: 8px; padding: 15px; margin-bottom: 12px; box-shadow: 0 3px 10px var(--shadow-base); transition: transform 0.2s; position: relative; overflow: hidden; }
+        .task-item { display: flex; content-visibility: auto; --task-color: var(--color-primary); background: var(--bg-surface); border-left: 5px solid var(--task-color); border-radius: 8px; padding: 15px; margin-bottom: 12px; box-shadow: 0 3px 10px var(--shadow-base); transition: transform 0.2s; position: relative; overflow: hidden; }
+        .task-item-right { flex: 1; }
         .task-item:hover { transform: translateY(-2px); box-shadow: 0 5px 15px var(--shadow-base); }
         /* 状态颜色映射 */
         .task-item.status-safe { --task-color: var(--color-success); }
@@ -220,6 +221,15 @@
         .delete-btn:hover { color: var(--color-danger); background: var(--color-danger-light); }
         .complete-btn { color: var(--color-success); }
         .complete-btn:hover { color: var(--color-success-dark); background: var(--color-success-light); }
+
+        /* 拖拽模式下的样式 */
+        .task-item.draggable-item { cursor: grab; transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s; }
+        .task-item.draggable-item:active { cursor: grabbing; }
+        .drag-handle { margin-right: 8px; padding: 10px 5px; cursor: grab; color: var(--text-tertiary); display: flex; align-items: center; touch-action: none; }
+        .task-item.dragging { opacity: 0.4; background: var(--bg-surface-alt); border: 2px dashed var(--color-primary); box-shadow: none; transform: scale(0.98); }
+        /* 移动端触摸拖拽时的样式 */
+        .task-item.touch-dragging { background: var(--bg-surface); box-shadow: 0 10px 20px var(--shadow-heavy); z-index: 1000; opacity: 0.4; transform: scale(1.02); /* 稍微放大，产生“浮起”的感觉 */ border-left: 5px solid var(--color-primary);}
+        .task-header { align-items: center; }
 
         /* === Subtasks (Child Tasks) === */
         /* Modal Input */
@@ -379,6 +389,8 @@
 
     <symbol id="icon-empty-tasks" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15"/><path d="M12 12H15"/><path d="M12 16H15"/><path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z"/><path d="M9 12H9.01"/><path d="M9 16H9.01"/></symbol>
     <symbol id="icon-empty-search" viewBox="0 0 24 24" fill="currentColor"><path d="M9.172 16.242L12 13.414L14.828 16.242L16.242 14.828L13.414 12L16.242 9.172L14.828 7.758L12 10.586L9.172 7.758L7.758 9.172L10.586 12L7.758 14.828L9.172 16.242Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22ZM12 20C16.418 20 20 16.418 20 12C20 7.582 16.418 4 12 4C7.582 4 4 7.582 4 12C4 16.418 7.582 20 12 20Z"/></symbol>
+
+    <symbol id="icon-drag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></symbol>
 </svg>
 <div class="container">
     <header>
@@ -454,6 +466,7 @@
                     <button class="dropdown-option" data-sort="created-desc"><span data-i18n="sortCreated">新创建</span></button>
                     <button class="dropdown-option" data-sort="due-asc"><span data-i18n="sortDue">截止日期</span></button>
                     <button class="dropdown-option" data-sort="alpha-asc"><span data-i18n="sortAlpha">A-Z</span></button>
+                    <button class="dropdown-option" data-sort="manual"><span data-i18n="sortManual">自定义排序 (拖拽)</span></button>
                 </div>
             </div>
         </div>
@@ -526,30 +539,32 @@
 
 <template id="task-template">
     <div class="task-item">
-        <div class="task-header">
-            <div class="task-title">
-                <svg class="icon icon-sm" style="stroke: var(--color-success); margin-right: 8px;"><use href="#icon-check"></use></svg>
-                <span class="task-name"></span>
+        <div class="task-item-right">
+            <div class="task-header">
+                <div class="task-title">
+                    <svg class="icon icon-sm" style="stroke: var(--color-success); margin-right: 8px;"><use href="#icon-check"></use></svg>
+                    <span class="task-name"></span>
+                </div>
+                <div class="task-date"></div>
             </div>
-            <div class="task-date"></div>
-        </div>
-        <div class="task-desc"></div>
-        <div class="subtasks-list"></div>
-        <div class="progress-bar"><div class="progress-fill"></div></div>
-        <div class="task-footer">
-            <div class="status-indicator">
-                <div class="status-dot"></div>
-                <span class="status-text"></span> <span class="status-time-left"></span> </div>
-            <div class="task-actions">
-                <button class="action-btn complete-btn" data-action="toggle" title="标记完成">
-                    <svg class="icon"><use href="#icon-check"></use></svg>
-                </button>
-                <button class="action-btn edit-btn" data-action="edit" title="编辑">
-                    <svg class="icon"><use href="#icon-edit"></use></svg>
-                </button>
-                <button class="action-btn delete-btn" data-action="delete" title="删除">
-                    <svg class="icon"><use href="#icon-trash"></use></svg>
-                </button>
+            <div class="task-desc"></div>
+            <div class="subtasks-list"></div>
+            <div class="progress-bar"><div class="progress-fill"></div></div>
+            <div class="task-footer">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span class="status-text"></span> <span class="status-time-left"></span> </div>
+                <div class="task-actions">
+                    <button class="action-btn complete-btn" data-action="toggle" title="标记完成">
+                        <svg class="icon"><use href="#icon-check"></use></svg>
+                    </button>
+                    <button class="action-btn edit-btn" data-action="edit" title="编辑">
+                        <svg class="icon"><use href="#icon-edit"></use></svg>
+                    </button>
+                    <button class="action-btn delete-btn" data-action="delete" title="删除">
+                        <svg class="icon"><use href="#icon-trash"></use></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -847,6 +862,8 @@
                     e.preventDefault();
                 }
             });
+
+            setupDragAndDrop();
         }
 
         function handleKeyboardShortcuts(e) {
@@ -879,18 +896,24 @@
             const dueDateTime = (!DOM.inputs.noDeadline.checked && DOM.inputs.date.value)
                 ? utils.localToUTC(DOM.inputs.date.value, DOM.inputs.time.value) : null;
 
+            // 自定义排序下新建任务插入尾部了
+            const maxOrder = state.tasks.length > 0 ? Math.max(...state.tasks.map(t => t.order || 0)) : 0;
+
             const taskPayload = {
                 name: DOM.inputs.name.value.trim(),
                 description: DOM.inputs.desc.value.trim(),
                 subtasks: state.tempSubtasks,
                 dueDate: dueDateTime,
-                completed: false
+                completed: false,
+                order: state.editingTaskId ? undefined : (maxOrder + 10000) // 新任务排最后
             };
 
             try {
                 if (state.editingTaskId) {
                     const original = state.tasks.find(t => t.id === state.editingTaskId);
-                    await dbActions.updateTask({ ...original, ...taskPayload });
+                    const updatedTask = { ...original, ...taskPayload };
+                    if (taskPayload.order === undefined) updatedTask.order = original.order || 0;
+                    await dbActions.updateTask(updatedTask);
                     utils.notify(t['taskUpdated']);
                 } else {
                     await dbActions.addTask({
@@ -1060,11 +1083,7 @@
                 switch (state.filter) {
                     case 'active': return !task.completed;
                     case 'completed': return task.completed;
-                    case 'overdue':
-                        console.log(task);
-                        console.log(!task.completed, task.dueDate);
-                        console.log(new Date(task.dueDate), new Date(), new Date(task.dueDate) < new Date());
-                        return !task.completed && task.dueDate && new Date(task.dueDate) < new Date();
+                    case 'overdue': return !task.completed && task.dueDate && new Date(task.dueDate) < new Date();
                     case 'no-deadline': return !task.dueDate;
                     default: return true;
                 }
@@ -1205,6 +1224,21 @@
             el.querySelector('[data-action="toggle"]').title = task.completed ? t['markIncomplete'] : t['markComplete'];
             el.querySelector('[data-action="edit"]').title = t['editTaskTitle'];
             el.querySelector('[data-action="delete"]').title = t['deleteTaskTitle'];
+
+            // H. 拖拽手柄 (仅在 manual 模式下显示)
+            // 先清理旧的
+            const existingHandle = el.querySelector('.drag-handle');
+            if (existingHandle) existingHandle.remove();
+            el.removeAttribute('draggable');
+            el.classList.remove('draggable-item'); // 用于 CSS 样式
+
+            if (state.sort === 'manual') {
+                el.setAttribute('draggable', 'true'); // 开启原生拖拽
+                el.classList.add('draggable-item');
+
+                const handle = document.createElement('div'); handle.className = 'drag-handle'; handle.innerHTML = `<svg class="icon"><use href="#icon-drag"></use></svg>`;
+                el.prepend(handle); // 插入到最左边
+            }
         }
 
         function renderSubtaskList(el, task) {
@@ -1516,6 +1550,14 @@
             sortTasks: (list) => {
                 const l = [...list]; // 复制一份数组以免修改原引用
                 switch (state.sort) {
+                    case 'manual': // 自定义排序
+                        // 按 order 从小到大排。如果没有 order (老数据)，暂且视为 0。为了稳定性，order 相同时按 id 排
+                        return l.sort((a, b) => {
+                            const oA = (a.order !== undefined) ? a.order : 0;
+                            const oB = (b.order !== undefined) ? b.order : 0;
+                            if (oA !== oB) return oA - oB;
+                            return a.id - b.id; // 兜底
+                        });
                     case 'created-desc': return l.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                     case 'due-asc': return l.sort((a, b) => {
                         if (!a.dueDate && b.dueDate) return 1;
@@ -1712,6 +1754,191 @@
                 // 如果改为空，恢复原状
                 state.editingSubtaskIndex = -1; // 退出编辑模式
                 renderSubtaskPreview(); // 重绘：输入框变回文本
+            }
+        }
+
+        function setupDragAndDrop() {
+            let draggedItem = null;
+
+            // === 自动滚动状态与逻辑 ===
+            let scrollSpeed = 0;
+            let scrollFrameId = null;
+            // 执行滚动的循环函数
+            const performScroll = () => {
+                if (scrollSpeed !== 0) {
+                    window.scrollBy(0, scrollSpeed);
+                    // 持续滚动直到速度归零
+                    scrollFrameId = requestAnimationFrame(performScroll);
+                } else {
+                    scrollFrameId = null;
+                }
+            };
+            // 停止滚动的辅助函数 (拖拽结束时调用)
+            const stopAutoScroll = () => {
+                scrollSpeed = 0;
+                if (scrollFrameId) {
+                    cancelAnimationFrame(scrollFrameId);
+                    scrollFrameId = null;
+                }
+            };
+            // 检测边缘并设置滚动速度
+            const handleEdgeScroll = (y) => {
+                const threshold = 80; // 边缘检测范围 (px)
+                const maxSpeed = 12;  // 最大滚动速度
+                const h = window.innerHeight;
+
+                // 靠近顶部
+                if (y < threshold) {
+                    // 越靠近边缘速度越快
+                    scrollSpeed = -Math.max(2, maxSpeed * ((threshold - y) / threshold));
+                    if (!scrollFrameId) performScroll();
+                }
+                // 靠近底部
+                else if (y > h - threshold) {
+                    const dist = y - (h - threshold);
+                    scrollSpeed = Math.max(2, maxSpeed * (dist / threshold));
+                    if (!scrollFrameId) performScroll();
+                }
+                // 在中间区域，停止滚动
+                else {
+                    scrollSpeed = 0;
+                    if (scrollFrameId) {
+                        cancelAnimationFrame(scrollFrameId);
+                        scrollFrameId = null;
+                    }
+                }
+            };
+
+
+
+            // === A. 桌面端原生 Drag & Drop ===
+            DOM.taskList.addEventListener('dragstart', (e) => {
+                if (state.sort !== 'manual') return;
+                const item = e.target.closest('.task-item');
+                if (!item) return;
+
+                draggedItem = item;
+                e.dataTransfer.effectAllowed = 'move';
+                // 延迟添加样式，让浏览器生成“重影”后再隐藏本体
+                requestAnimationFrame(() => item.classList.add('dragging'));
+            });
+            DOM.taskList.addEventListener('dragend', (e) => {
+                if (!draggedItem) return;
+                draggedItem.classList.remove('dragging');
+                stopAutoScroll(); // 停止滚动
+                saveNewOrder(); // 保存
+                draggedItem = null;
+            });
+            DOM.taskList.addEventListener('dragover', (e) => {
+                if (state.sort !== 'manual' || !draggedItem) return;
+                e.preventDefault(); // 允许 Drop
+                // 1. 处理自动滚动
+                handleEdgeScroll(e.clientY);
+                // 2. 处理 DOM 移动
+                const afterElement = getDragAfterElement(DOM.taskList, e.clientY);
+                const currentNextSibling = draggedItem.nextElementSibling;
+                // 只有当位置真的变了，才操作 DOM，防止闪烁
+                if (afterElement !== currentNextSibling) {
+                    if (afterElement == null) {
+                        DOM.taskList.appendChild(draggedItem);
+                    } else {
+                        DOM.taskList.insertBefore(draggedItem, afterElement);
+                    }
+                }
+            });
+
+            // === B. 移动端 Touch 事件模拟 (Reorder List 模式) ===
+            // 监听 touchstart: 只有按住手柄 (.drag-handle) 才能拖动
+            DOM.taskList.addEventListener('touchstart', (e) => {
+                if (state.sort !== 'manual') return;
+                const handle = e.target.closest('.drag-handle');
+                if (!handle) return; // 必须按住手柄才能拖
+
+                const item = handle.closest('.task-item');
+                draggedItem = item;
+
+                item.classList.add('touch-dragging');
+
+                // 必须阻止默认事件，否则拖动时会触发页面滚动
+                if (e.cancelable) e.preventDefault();
+            }, { passive: false });
+
+            DOM.taskList.addEventListener('touchmove', (e) => {
+                if (state.sort !== 'manual' || !draggedItem) return;
+                if (e.cancelable) e.preventDefault(); // 阻止页面滚动
+                const touch = e.touches[0];
+                // 1. 处理自动滚动 (使用手指的 Y 坐标)
+                handleEdgeScroll(touch.clientY);
+                // 2. 处理 DOM 移动
+                const afterElement = getDragAfterElement(DOM.taskList, touch.clientY);
+                const currentNextSibling = draggedItem.nextElementSibling;
+                // 复用防闪烁逻辑
+                if (afterElement !== currentNextSibling) {
+                    if (afterElement == null) {
+                        DOM.taskList.appendChild(draggedItem);
+                    } else {
+                        DOM.taskList.insertBefore(draggedItem, afterElement);
+                    }
+                }
+            }, { passive: false });
+            DOM.taskList.addEventListener('touchend', (e) => {
+                if (state.sort !== 'manual' || !draggedItem) return;
+
+                draggedItem.classList.remove('touch-dragging');
+                stopAutoScroll(); // 停止滚动
+                saveNewOrder();
+                draggedItem = null;
+            });
+        }
+        // 辅助：计算拖拽位置
+        function getDragAfterElement(container, y) {
+            // 获取所有非正在拖拽的任务元素
+            const draggableElements = [...container.querySelectorAll('.task-item:not(.dragging):not(.touch-dragging)')];
+
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+
+                // 鼠标/手指在元素中心上方 (offset < 0) 且距离最近
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        async function saveNewOrder() {
+            // 1. 获取 DOM 中的新顺序 ID
+            const newOrderIds = Array.from(DOM.taskList.children)
+                .map(el => Number(el.dataset.taskId))
+                .filter(id => !isNaN(id)); // 过滤掉可能的无效节点
+
+            if (newOrderIds.length === 0) return;
+
+            // 2. 更新内存状态 (state.tasks)，让 UI 逻辑立即生效
+            newOrderIds.forEach((id, index) => {
+                const task = state.tasks.find(t => t.id === id);
+                if (task) task.order = index * 1000; // 留出 1000 的间隔，方便未来插入
+            });
+
+            // 3. 数据库批量写入 (性能优化核心)
+            try {
+                const tx = state.db.transaction([CONFIG.DB.STORES.TASKS], 'readwrite');
+                const store = tx.objectStore(CONFIG.DB.STORES.TASKS);
+                // 在同一个事务中执行所有 put 操作
+                for (const id of newOrderIds) {
+                    const task = state.tasks.find(t => t.id === id);
+                    if (task) store.put(task); // 此时不需要 await
+                }
+                // 等待事务完成
+                await new Promise((resolve, reject) => {
+                    tx.oncomplete = resolve;
+                    tx.onerror = () => reject(tx.error);
+                });
+            } catch (err) {
+                console.error('排序保存失败:', err);
+                utils.notify(state.translations[state.currentLanguage]['saveError'], 'error');
             }
         }
 

@@ -92,5 +92,6 @@
   "sortSmart": "Smart Sort",
   "sortCreated": "Newest Created",
   "sortDue": "Due Date",
-  "sortAlpha": "Name (A-Z)"
+  "sortAlpha": "Name (A-Z)",
+  "sortManual": "Custom"
 }
