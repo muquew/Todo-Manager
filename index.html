@@ -1044,30 +1044,51 @@
             if (DOM.taskList.querySelector('.empty-state')) DOM.taskList.innerHTML = '';
 
             // 3. DOM Diff/Patch
-            const existingMap = new Map();
-            Array.from(DOM.taskList.children).forEach(el => {
-                if (el.classList.contains('task-item')) existingMap.set(Number(el.dataset.taskId), el);
-            });
 
-            let refNode = DOM.taskList.firstChild;
-            result.forEach(task => {
-                const existingEl = existingMap.get(task.id);
-                if (existingEl) {
-                    // 更新内容
-                    renderTaskItem(existingEl, task);
-                    // 检查顺序
-                    if (existingEl !== refNode) DOM.taskList.insertBefore(existingEl, refNode);
-                    // 标记为 "已处理"
-                    existingMap.delete(task.id);
-                    refNode = existingEl.nextSibling;
-                } else {
+            // 分支 A: 快速渲染 (列表当前为空，直接批量插入)
+            // 场景：页面初始化、从“已完成”切到“进行中”等导致列表完全重置的情况
+            if (DOM.taskList.children.length === 0) {
+                const fragment = document.createDocumentFragment();
+                result.forEach(task => {
                     const newEl = createTaskNode(task);
-                    DOM.taskList.insertBefore(newEl, refNode);
-                }
-            });
+                    fragment.appendChild(newEl);
+                });
+                DOM.taskList.appendChild(fragment); // ⚡️ 仅触发一次回流
+            }
+            // 分支 B: 增量更新 (Diff 算法)
+            // 场景：标记单个任务完成、删除单个任务、新增单个任务
+            else {
+                const existingMap = new Map();
+                // 仅获取任务节点，忽略可能的其他元素
+                Array.from(DOM.taskList.children).forEach(el => {
+                    if (el.classList.contains('task-item')) existingMap.set(Number(el.dataset.taskId), el);
+                });
 
-            // 移除多余元素
-            existingMap.forEach(el => el.remove());
+                let refNode = DOM.taskList.firstChild;
+
+                result.forEach(task => {
+                    const existingEl = existingMap.get(task.id);
+                    if (existingEl) {
+                        // 1. Patch: 更新内容
+                        renderTaskItem(existingEl, task);
+                        // 2. Move: 如果位置不对，移动它
+                        if (existingEl !== refNode) {
+                            DOM.taskList.insertBefore(existingEl, refNode);
+                        }
+                        // 标记已处理，指针后移
+                        existingMap.delete(task.id);
+                        refNode = existingEl.nextSibling;
+                    } else {
+                        // 3. Create: 新增节点
+                        const newEl = createTaskNode(task);
+                        DOM.taskList.insertBefore(newEl, refNode);
+                        // 新节点插在 refNode 之前，所以 refNode 指针不需要动，继续指向下一个待比较节点
+                    }
+                });
+
+                // 4. Remove: 清理掉多余的节点 (例如刚被筛选掉的任务)
+                existingMap.forEach(el => el.remove());
+            }
         }
 
         function createTaskNode(task) {
